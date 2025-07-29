@@ -570,6 +570,36 @@
         .desk-options-overlay .btn-random-option:hover {
             background-color: #facc15;
         }
+        /* Visual for a fixed desk on the layout */
+        .desk.fixed-placement {
+            border: 2px solid rgba(148, 163, 184, 0.5); /* Lighter, semi-transparent solid grey border */
+            box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.2); /* Very subtle grey glow */
+        }
+
+        .fixed-seat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+            color: #475569;
+        }
+        .fixed-seat-item:last-child {
+            border-bottom: none;
+        }
+        .fixed-seat-item .fixed-seat-info {
+            font-weight: 500;
+        }
+        .fixed-seat-item button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            box-shadow: none;
+            background-image: linear-gradient(to right, #ef4444, #dc2626);
+        }
+        .fixed-seat-item button:hover {
+            background-image: linear-gradient(to right, #dc2626, #b91c1c);
+        }
 
     </style>
 </head>
@@ -662,9 +692,22 @@
                 <div id="avoidPairsContainer" class="mb-4">
                     <!-- Avoid pairs will be added here -->
                 </div>
-                <button onclick="addAvoidPair()" class="w-full btn-secondary">
+                <button onclick="addAvoidPair()" class="w-full btn-secondary mb-6">
                     + 피해야 할 학생 추가
                 </button>
+
+                <!-- New Fixed Seating Section -->
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">자리 고정 설정</h2>
+                <div class="input-group mb-4">
+                    <input type="text" id="fixedStudentNameInput" placeholder="학생 이름" class="w-2/3">
+                    <input type="number" id="fixedDeskNumberInput" placeholder="자리 번호" min="1" class="w-1/3">
+                </div>
+                <button onclick="addFixedSeat()" class="w-full btn-add-student mb-4">
+                    자리 고정 추가
+                </button>
+                <div id="fixedSeatsListContainer" class="mb-4 border p-2 rounded-lg bg-white overflow-y-auto max-h-48">
+                    <!-- Fixed seats will be listed here -->
+                </div>
             </div>
 
             <!-- NEW: Snapshot History Panel (hidden by default) -->
@@ -702,11 +745,12 @@
             </li>
             <li><strong>자리 삭제 및 복구:</strong> 자리 메뉴에서 '자리 삭제'를 선택하거나, 자리에 마우스를 올렸을 때 나타나는 'X' 버튼을 눌러 자리를 삭제할 수 있습니다. 삭제된 자리는 '회색'으로 표시되며, '복구' 버튼으로 되돌릴 수 있습니다.</li>
             <li><strong>피해야 할 학생 설정:</strong> 오른쪽 상단의 톱니바퀴 버튼에 마우스를 올리면 '설정' 툴팁이 나타납니다. 클릭하여 '피해야 할 학생 설정' 패널을 열고, 함께 앉으면 안 되는 학생들을 지정합니다.</li>
+            <li><strong>자리 고정 설정:</strong> '피해야 할 학생 설정' 패널 내에서 학생 이름과 자리 번호(1부터 시작)를 입력하여 특정 학생을 특정 자리에 고정할 수 있습니다. 고정된 자리는 회색 점선 테두리로 표시되며, 드래그/삭제/복구가 불가능합니다.</li>
             <li><strong>스냅샷 목록:</strong> 오른쪽 상단의 목록 아이콘에 마우스를 올리면 '데이터 관리' 툴팁이 나타납니다. 클릭하여 '스냅샷 목록' 패널을 열 수 있습니다.</li>
             <li><strong>스냅샷 저장:</strong> '스냅샷 목록' 패널에서 이름을 입력하고 '저장' 버튼을 클릭하여 현재 상태를 스냅샷으로 저장할 수 있습니다. 이름이 없으면 자동으로 날짜와 시간이 기록됩니다.</li>
             <li><strong>스냅샷 불러오기 및 삭제:</strong> '스냅샷 목록'에서 저장된 스냅샷들을 확인하고, '불러오기'나 '삭제' 버튼을 통해 관리할 수 있습니다.</li>
-            <li><strong>자리 바꾸기:</strong> '자리 바꾸기' 버튼을 클릭하면 학생들이 모든 자리 유형과 피해야 할 학생 규칙을 고려하여 무작위로 배치됩니다.</li>
-            <li><strong>자리 수동 변경:</strong> 학생들이 배치된 후, 학생이 있는 자리를 마우스로 끌어 다른 활성 자리로 옮기면 자리를 바꿀 수 있습니다. 이 기능은 피해야 할 학생 규칙과 자리 유형 선호에 영향을 받습니다.</li>
+            <li><strong>자리 바꾸기:</strong> '자리 바꾸기' 버튼을 클릭하면 학생들이 모든 자리 유형과 피해야 할 학생 규칙, 그리고 고정된 자리 설정을 고려하여 무작위로 배치됩니다.</li>
+            <li><strong>자리 수동 변경:</strong> 학생들이 배치된 후, 학생이 있는 자리를 마우스로 끌어 다른 활성 자리로 옮기면 자리를 바꿀 수 있습니다. 이 기능은 피해야 할 학생 규칙과 자리 유형 선호에 영향을 받으며, 고정된 자리는 변경할 수 없습니다.</li>
             <li><strong>초기화:</strong> '모든 설정 및 배치 초기화' 버튼으로 모든 데이터를 기본 상태로 되돌릴 수 있습니다.</li>
         </ol>
         <button onclick="hideTutorialMessageBox()">닫기</button>
@@ -729,6 +773,9 @@
         let snapshotHistoryPanel; // New: Reference to the snapshot history panel
         let snapshotNameInput;
         let savedSnapshotsList;
+        let fixedStudentNameInput; // New: Fixed student name input
+        let fixedDeskNumberInput; // New: Fixed desk number input
+        let fixedSeatsListContainer; // New: Container for fixed seats list
 
         let rows = 4; // Default rows
         let cols = 5; // Default columns
@@ -736,6 +783,7 @@
         let studentData = []; // Array of {name, maleChecked, femaleChecked} from dynamic input rows
         let studentNames = []; // Derived from studentData: {name, gender} objects for shuffle logic
         let avoidRules = []; // Array of [student1, student2] pairs to avoid
+        let fixedSeats = []; // New: Array of {studentName: '...', deskIndex: N} for fixed placements
         
         let deskGenderPreferences = []; // Stores 'random', 'male', 'female' for each desk
         let deskAvailability = []; // 'active' or 'inactive' for each desk (for deleted desks)
@@ -769,6 +817,7 @@
                 studentData: studentData,
                 placedStudents: placedStudents,
                 avoidRules: avoidRules,
+                fixedSeats: fixedSeats, // Save fixed seats
                 deskGenderPreferences: deskGenderPreferences,
                 deskAvailability: deskAvailability,
             };
@@ -794,6 +843,7 @@
 
                 placedStudents = data.placedStudents || [];
                 avoidRules = data.avoidRules || [];
+                fixedSeats = data.fixedSeats || []; // Load fixed seats
                 deskGenderPreferences = data.deskGenderPreferences || [];
                 deskAvailability = data.deskAvailability || [];
                 
@@ -802,6 +852,7 @@
                 applyDeskGenderPreferencesVisuals();
                 applyDeskAvailabilityVisuals();
                 renderAvoidRules();
+                renderFixedSeats(); // Render fixed seats list
 
                 updateLayoutMessage('이전 작업 상태가 로드되었습니다.', 2000); // Changed to layoutMessage
 
@@ -830,6 +881,7 @@
                 studentData: studentData,
                 placedStudents: placedStudents,
                 avoidRules: avoidRules,
+                fixedSeats: fixedSeats, // Save fixed seats in snapshot
                 deskGenderPreferences: deskGenderPreferences,
                 deskAvailability: deskAvailability,
             };
@@ -877,6 +929,7 @@
 
                 placedStudents = data.placedStudents;
                 avoidRules = data.avoidRules;
+                fixedSeats = data.fixedSeats; // Load fixed seats from snapshot
                 deskGenderPreferences = data.deskGenderPreferences;
                 deskAvailability = data.deskAvailability;
                 
@@ -885,6 +938,7 @@
                 applyDeskGenderPreferencesVisuals();
                 applyDeskAvailabilityVisuals();
                 renderAvoidRules();
+                renderFixedSeats(); // Render fixed seats list
                 saveData(); // Save the loaded state as the new current working state
 
                 updateLayoutMessage(`'${snapshotToLoad.name}' 스냅샷을 불러왔습니다.`, 2000); // Changed to layoutMessage
@@ -1099,6 +1153,21 @@
             if (currentDeskForPreferenceChange === null) {
                 // This case should ideally not happen with hover, but good for robustness
                 return;
+            }
+
+            // Prevent changing type or deleting a fixed desk
+            const isFixed = fixedSeats.some(fs => fs.deskIndex === currentDeskForPreferenceChange);
+            if (isFixed && mode !== 'delete') { // Allow deletion of fixed rule from fixed seats section only
+                 updateLayoutMessage(`고정된 자리는 자리 유형을 변경할 수 없습니다.`, 2000);
+                 clearPreferenceFocus();
+                 return;
+            }
+            if (isFixed && mode === 'delete') {
+                 // If we're allowing removal of fixed desk from overlay, need to remove fixed rule too.
+                 // For now, let's keep deletion of fixed desks *only* via the fixed seats list in settings.
+                 updateLayoutMessage(`고정된 자리는 여기서 삭제할 수 없습니다. '설정'에서 고정 설정을 해제해주세요.`, 3000);
+                 clearPreferenceFocus();
+                 return;
             }
 
             if (mode === 'delete') {
@@ -1332,6 +1401,7 @@
             applyDeskGenderPreferencesVisuals(); // Apply initial/loaded gender type colors
             applyDeskAvailabilityVisuals(); // Apply initial/loaded availability visuals
             updateDeskVisuals(); // Set initial occupied/empty states
+            applyFixedPlacementVisuals(); // Apply fixed visuals
             saveData(); // Save layout and selection state
         }
 
@@ -1345,6 +1415,8 @@
             addStudentRow(); // Add one empty student row by default
             avoidRules = [];
             renderAvoidRules();
+            fixedSeats = []; // Reset fixed seats
+            renderFixedSeats(); // Render fixed seats list
 
             // Reset layout and all desk-related data
             generateLayout(true); 
@@ -1400,6 +1472,22 @@
         }
 
         /**
+         * Applies the fixed placement visual class to desks.
+         */
+        function applyFixedPlacementVisuals() {
+            const desks = classroomLayoutDiv.children;
+            for (let i = 0; i < desks.length; i++) {
+                const desk = desks[i];
+                desk.classList.remove('fixed-placement'); // Remove first
+
+                const isDeskFixed = fixedSeats.some(fs => fs.deskIndex === i && placedStudents[i] && placedStudents[i].name === fs.studentName);
+                if (isDeskFixed) {
+                    desk.classList.add('fixed-placement');
+                }
+            }
+        }
+
+        /**
          * Updates the visual representation of desks with student names and gender.
          * Also updates desk classes (occupied/empty) and cursor styles based on actual student gender.
          */
@@ -1445,6 +1533,7 @@
                 }
                 // If inactive, it will be handled by applyDeskAvailabilityVisuals
             }
+            applyFixedPlacementVisuals(); // Reapply fixed visuals after any student changes
         }
 
         /**
@@ -1452,6 +1541,13 @@
          * @param {number} index - The index of the desk to remove.
          */
         function removeDesk(index) {
+            // Prevent removing a fixed desk via this method
+            const isFixed = fixedSeats.some(fs => fs.deskIndex === index);
+            if (isFixed) {
+                updateLayoutMessage(`고정된 자리는 삭제할 수 없습니다. '자리 고정 설정'에서 해제해주세요.`, 3000);
+                return;
+            }
+
             if (deskAvailability[index] === 'inactive') return; // Already inactive
 
             deskAvailability[index] = 'inactive';
@@ -1470,6 +1566,13 @@
          * @param {number} index - The index of the desk to restore.
          */
         function restoreDesk(index) {
+            // Prevent restoring a fixed desk via this method
+            const isFixed = fixedSeats.some(fs => fs.deskIndex === index);
+            if (isFixed) {
+                updateLayoutMessage(`고정된 자리는 여기서 복구할 수 없습니다. '자리 고정 설정'에서 해제해주세요.`, 3000);
+                return;
+            }
+
             if (deskAvailability[index] === 'active') return; // Already active
 
             deskAvailability[index] = 'active';
@@ -1536,11 +1639,49 @@
                     return false;
                 };
 
+                // Phase 0: Place FIXED students first
+                let fixedPlacementFailedThisAttempt = false;
+                for (const fixedSeat of fixedSeats) {
+                    const fixedStudentObj = studentNames.find(s => s.name === fixedSeat.studentName);
+                    const deskIndex = fixedSeat.deskIndex;
+
+                    if (!fixedStudentObj) {
+                        updateLayoutMessage(`'${fixedSeat.studentName}' 학생이 학생 목록에 없어 ${deskIndex + 1}번 자리에 고정할 수 없습니다.`, 3000);
+                        fixedPlacementFailedThisAttempt = true;
+                        break;
+                    }
+                    if (deskIndex < 0 || deskIndex >= totalDesks || deskAvailability[deskIndex] === 'inactive') {
+                        updateLayoutMessage(`${fixedSeat.studentName}을(를) 위한 ${deskIndex + 1}번 자리가 없거나 삭제되었습니다.`, 3000);
+                        fixedPlacementFailedThisAttempt = true;
+                        break;
+                    }
+                    if (trialPlacement[deskIndex] !== null) {
+                         // This desk is already taken by another fixed student, conflict!
+                         updateLayoutMessage(`${fixedSeat.studentName}을(를) 위한 ${deskIndex + 1}번 자리가 다른 고정 학생으로 인해 이미 채워져 있습니다.`, 3000);
+                         fixedPlacementFailedThisAttempt = true;
+                         break;
+                    }
+
+                    // Try to place fixed student, check avoid rules against *already placed* fixed students
+                    if (!tryPlaceAndRemove(fixedStudentObj, deskIndex, trialPlacement, currentStudentsInPool)) {
+                        updateLayoutMessage(`${fixedSeat.studentName}을(를) ${deskIndex + 1}번 자리에 고정하면 피해야 할 학생 규칙에 위배됩니다.`, 3000);
+                        fixedPlacementFailedThisAttempt = true;
+                        break;
+                    } else {
+                        // Mark fixed students as successfully placed, so they are not shuffled later
+                        // They are already removed from currentStudentsInPool by tryPlaceAndRemove
+                    }
+                }
+
+                if (fixedPlacementFailedThisAttempt) {
+                    currentAttempt++;
+                    continue; // Restart the entire shuffle attempt if fixed placement fails
+                }
+
+
                 // Phase 1: STRICTLY place gendered students into their matching preferred desks
-                // Sort desks by preference to ensure a consistent attempt order for strict desks
-                const malePreferredDesksIndices = shuffleArray(allActiveDesksIndices.filter(idx => deskGenderPreferences[idx] === 'male'));
+                const malePreferredDesksIndices = shuffleArray(allActiveDesksIndices.filter(idx => deskGenderPreferences[idx] === 'male' && trialPlacement[idx] === null));
                 for (const deskIndex of malePreferredDesksIndices) {
-                    if (trialPlacement[deskIndex] !== null) continue; // Already filled (shouldn't happen in P1 if logic is right)
                     if (currentStudentsInPool.length === 0) break;
 
                     const eligibleMales = currentStudentsInPool.filter(s => s.gender === '남'); // Strictly only male students
@@ -1553,12 +1694,10 @@
                             break;
                         }
                     }
-                    // If not placed, this strict male desk remains empty for now for strict male
                 }
 
-                const femalePreferredDesksIndices = shuffleArray(allActiveDesksIndices.filter(idx => deskGenderPreferences[idx] === 'female'));
+                const femalePreferredDesksIndices = shuffleArray(allActiveDesksIndices.filter(idx => deskGenderPreferences[idx] === 'female' && trialPlacement[idx] === null));
                 for (const deskIndex of femalePreferredDesksIndices) {
-                    if (trialPlacement[deskIndex] !== null) continue; // Already filled
                     if (currentStudentsInPool.length === 0) break;
 
                     const eligibleFemales = currentStudentsInPool.filter(s => s.gender === '여'); // Strictly only female students
@@ -1571,23 +1710,23 @@
                             break;
                         }
                     }
-                    // If not placed, this strict female desk remains empty for now for strict female
                 }
 
                 // Phase 2: Place remaining students into random-preferred desks and then fill any remaining gendered desks (if possible with matching or '무' but NOT opposite gender)
-                const randomDesksIndices = shuffleArray(allActiveDesksIndices.filter(idx => deskGenderPreferences[idx] === 'random'));
+                const randomDesksIndices = shuffleArray(allActiveDesksIndices.filter(idx => deskGenderPreferences[idx] === 'random' && trialPlacement[idx] === null));
                 const unfilledMaleDesks = shuffleArray(malePreferredDesksIndices.filter(idx => trialPlacement[idx] === null)); // Male desks still empty from Phase 1
                 const unfilledFemaleDesks = shuffleArray(femalePreferredDesksIndices.filter(idx => trialPlacement[idx] === null)); // Female desks still empty from Phase 1
 
                 // Combine all remaining empty active desks in a shuffled order
                 const allRemainingEmptyActiveDesks = shuffleArray([
-                    ...randomDesksIndices.filter(idx => trialPlacement[idx] === null), // Random desks that are empty
+                    ...randomDesksIndices,
                     ...unfilledMaleDesks,
                     ...unfilledFemaleDesks
                 ]);
 
                 for (const deskIndex of allRemainingEmptyActiveDesks) {
                     if (currentStudentsInPool.length === 0) break; // All students placed
+                    if (trialPlacement[deskIndex] !== null) continue; // Skip if already filled by fixed placement or earlier phase
 
                     const deskType = deskGenderPreferences[deskIndex];
 
@@ -1626,7 +1765,9 @@
             } else {
                 // If shuffle failed, clear all students from active desks to reflect no valid placement
                 for(let i = 0; i < totalDesks; i++) {
-                    if (deskAvailability[i] === 'active') { // Clear only active desks
+                    // Only clear non-fixed students from active desks
+                    const isFixed = fixedSeats.some(fs => fs.deskIndex === i && placedStudents[i] && placedStudents[i].name === fs.studentName);
+                    if (deskAvailability[i] === 'active' && !isFixed) {
                         placedStudents[i] = null;
                     }
                 }
@@ -1772,6 +1913,93 @@
             saveData();
         }
 
+        // --- Fixed Seats Management ---
+        /**
+         * Renders the list of fixed seats in the settings panel.
+         */
+        function renderFixedSeats() {
+            fixedSeatsListContainer.innerHTML = '';
+            if (fixedSeats.length === 0) {
+                fixedSeatsListContainer.innerHTML = '<p class="text-sm text-gray-500">고정된 자리가 없습니다.</p>';
+            }
+            fixedSeats.forEach((fixedSeat, index) => {
+                const div = document.createElement('div');
+                div.classList.add('fixed-seat-item');
+                div.dataset.index = index;
+
+                const infoSpan = document.createElement('span');
+                infoSpan.classList.add('fixed-seat-info');
+                infoSpan.textContent = `${fixedSeat.studentName} ➡️ ${fixedSeat.deskIndex + 1}번 자리`;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = '삭제';
+                deleteBtn.classList.add('btn-delete-student'); // Use the red delete style
+                deleteBtn.onclick = () => removeFixedSeat(index);
+
+                div.appendChild(infoSpan);
+                div.appendChild(deleteBtn);
+                fixedSeatsListContainer.appendChild(div);
+            });
+            applyFixedPlacementVisuals(); // Update visuals on layout
+            saveData();
+        }
+
+        /**
+         * Adds a new fixed seat rule.
+         */
+        function addFixedSeat() {
+            const studentName = fixedStudentNameInput.value.trim();
+            const deskNumber = parseInt(fixedDeskNumberInput.value.trim());
+            const deskIndex = deskNumber - 1; // Convert to 0-based index
+
+            if (!studentName) {
+                showMessageBox('학생 이름을 입력해주세요.', 1500);
+                return;
+            }
+            if (isNaN(deskNumber) || deskNumber <= 0 || deskIndex >= rows * cols) {
+                showMessageBox('유효한 자리 번호를 입력해주세요.', 1500);
+                return;
+            }
+
+            // Check if student exists in studentNames
+            const studentExists = studentNames.some(s => s.name === studentName);
+            if (!studentExists) {
+                showMessageBox(`'${studentName}' 학생이 학생 목록에 없습니다. 먼저 추가해주세요.`, 2000);
+                return;
+            }
+
+            // Check if desk is already fixed
+            const isDeskAlreadyFixed = fixedSeats.some(fs => fs.deskIndex === deskIndex);
+            if (isDeskAlreadyFixed) {
+                showMessageBox(`${deskNumber}번 자리는 이미 다른 학생으로 고정되어 있습니다.`, 2000);
+                return;
+            }
+
+            // Check if student is already fixed
+            const isStudentAlreadyFixed = fixedSeats.some(fs => fs.studentName === studentName);
+            if (isStudentAlreadyFixed) {
+                showMessageBox(`'${studentName}' 학생은 이미 다른 자리에 고정되어 있습니다.`, 2000);
+                return;
+            }
+
+            fixedSeats.push({ studentName: studentName, deskIndex: deskIndex });
+            renderFixedSeats();
+            fixedStudentNameInput.value = '';
+            fixedDeskNumberInput.value = '';
+            updateLayoutMessage(`'${studentName}' 학생이 ${deskNumber}번 자리에 고정되었습니다.`, 1500);
+        }
+
+        /**
+         * Removes a fixed seat rule by its index.
+         */
+        function removeFixedSeat(index) {
+            const removedFixedSeat = fixedSeats.splice(index, 1);
+            if (removedFixedSeat.length > 0) {
+                 updateLayoutMessage(`'${removedFixedSeat[0].studentName}' 학생의 ${removedFixedSeat[0].deskIndex + 1}번 자리 고정이 해제되었습니다.`, 1500);
+            }
+            renderFixedSeats();
+        }
+
 
         // --- Drag & Drop Handlers ---
 
@@ -1780,9 +2008,18 @@
          * @param {MouseEvent} e
          */
         function handleMouseDown(e) {
-            // Prevent drag if desk is inactive
+            // Check if the desk is a fixed placement. If so, prevent drag.
             const deskElement = e.target.closest('.desk');
             const deskIndex = parseInt(deskElement.dataset.index);
+            const isDeskFixed = fixedSeats.some(fs => fs.deskIndex === deskIndex);
+            if (isDeskFixed) {
+                e.preventDefault();
+                updateLayoutMessage(`고정된 자리는 드래그할 수 없습니다.`, 1500);
+                return;
+            }
+
+
+            // Prevent drag if desk is inactive
             if (deskAvailability[deskIndex] === 'inactive') {
                 e.preventDefault();
                 return;
@@ -1796,7 +2033,7 @@
             // Prevent drag if a desk is currently focused for preference change (green border)
             if (currentDeskForPreferenceChange !== null) {
                 e.preventDefault();
-                showMessageBox('자리 유형 설정 모드에서는 자리를 드래그할 수 없습니다. 모드를 해제하려면 빈 공간을 클릭하세요.', 3000);
+                showMessageBox('자리 유형 설정 모드에서는 자리를 드래그할 수 없습니다. 모드를 해제하려면 빈 공간을 클릭하세요.', 3000); // Critical warning, use messagebox
                 return;
             }
 
@@ -1852,9 +2089,13 @@
                 const targetDesk = targetElement ? targetElement.closest('.desk') : null;
 
                 // Apply drag-over only if it's an active desk and not the source desk
-                if (targetDesk && targetDesk.dataset.index !== String(dragSrcDeskIndex) && 
-                    deskAvailability[parseInt(targetDesk.dataset.index)] === 'active') {
-                    targetDesk.classList.add('drag-over');
+                if (targetDesk && targetDesk.dataset.index !== String(dragSrcDeskIndex)) {
+                    const targetDeskIndex = parseInt(targetDesk.dataset.index);
+                    const isTargetFixed = fixedSeats.some(fs => fs.deskIndex === targetDeskIndex);
+
+                    if (deskAvailability[targetDeskIndex] === 'active' && !isTargetFixed) {
+                        targetDesk.classList.add('drag-over');
+                    }
                 }
             }
         }
@@ -1889,8 +2130,9 @@
                 const targetDeskElement = targetElement ? targetElement.closest('.desk') : null;
                 if (targetDeskElement) {
                     const targetDeskIndex = parseInt(targetDeskElement.dataset.index);
-                    // Perform drop only if the target is an active desk and not the source desk itself
-                    if (deskAvailability[targetDeskIndex] === 'active' && targetDeskIndex !== dragSrcDeskIndex) {
+                    const isTargetFixed = fixedSeats.some(fs => fs.deskIndex === targetDeskIndex);
+
+                    if (deskAvailability[targetDeskIndex] === 'active' && targetDeskIndex !== dragSrcDeskIndex && !isTargetFixed) {
                         drop(dragSrcDeskIndex, targetDeskIndex);
                     } else {
                         // If not a valid drop target, show message and revert
@@ -1898,6 +2140,8 @@
                             updateLayoutMessage('동일한 자리에는 옮길 수 없습니다.', 1500); // Changed to layoutMessage
                         } else if (deskAvailability[targetDeskIndex] === 'inactive') {
                             updateLayoutMessage('삭제된 자리에는 학생을 옮길 수 없습니다.', 2000); // Changed to layoutMessage
+                        } else if (isTargetFixed) {
+                            updateLayoutMessage('고정된 자리에는 학생을 옮길 수 없습니다.', 2000); // Message for fixed desk
                         }
                     }
                 } else {
@@ -1921,6 +2165,14 @@
             const deskIndex = parseInt(deskElement.dataset.index);
 
             if (deskAvailability[deskIndex] === 'inactive') return; // No overlay for inactive desks
+            
+            // Do not show overlay for fixed desks, only show fixed message (if any)
+            const isFixed = fixedSeats.some(fs => fs.deskIndex === deskIndex);
+            if (isFixed) {
+                // Optionally show a quick message like "고정된 자리입니다."
+                // updateLayoutMessage(`고정된 자리입니다.`, 1000);
+                return; 
+            }
 
             // If already showing for this desk, do nothing
             if (currentDeskForPreferenceChange === deskIndex) return;
@@ -2021,6 +2273,13 @@
                 updateLayoutMessage('삭제된 자리에는 학생을 옮길 수 없습니다.', 2000); // Changed to layoutMessage
                 return;
             }
+            // Prevent drop if target is a fixed desk
+            const isTargetFixed = fixedSeats.some(fs => fs.deskIndex === targetIndex);
+            if (isTargetFixed) {
+                updateLayoutMessage(`고정된 자리에는 학생을 옮길 수 없습니다.`, 2000);
+                return;
+            }
+
 
             // Temporarily swap to check rules
             const tempPlacement = [...placedStudents];
@@ -2092,6 +2351,10 @@
             snapshotHistoryPanel = document.getElementById('snapshotHistoryPanel'); // New: Reference to the snapshot history panel
             snapshotNameInput = document.getElementById('snapshotNameInput');
             savedSnapshotsList = document.getElementById('savedSnapshotsList');
+            fixedStudentNameInput = document.getElementById('fixedStudentNameInput'); // New
+            fixedDeskNumberInput = document.getElementById('fixedDeskNumberInput'); // New
+            fixedSeatsListContainer = document.getElementById('fixedSeatsListContainer'); // New
+
 
             // Add event listeners that rely on initialized elements
             rowsInput.addEventListener('input', saveData);
